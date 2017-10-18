@@ -21,6 +21,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -53,8 +55,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 loc = new LatLng(location.getLatitude(), location.getLongitude());
                 myLat = location.getLatitude();
                 myLong = location.getLongitude();
-
                 mMap.clear();
+
+
                 mMap.addMarker(new MarkerOptions()
                         .position(loc)
                         .title("your position"));
@@ -86,6 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        setGeoKey();
 
 
 
