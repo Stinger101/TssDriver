@@ -95,7 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
     public void setGeoKey() {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("geofire");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("geofire");
         String randomId = ref.push().getKey();
         GeoFire geoFire = new GeoFire(ref);
         geoFire.setLocation("driverLocation/" + randomId, new GeoLocation(myLat, myLong), new GeoFire.CompletionListener() {
