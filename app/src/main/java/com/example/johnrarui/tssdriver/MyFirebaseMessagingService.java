@@ -2,6 +2,7 @@ package com.example.johnrarui.tssdriver;
 
 import android.app.Service;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -22,6 +23,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             //Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            Toast.makeText(this,"Something is Happening", Toast.LENGTH_SHORT).show();
         }
 
         // Check if message contains a notification payload.

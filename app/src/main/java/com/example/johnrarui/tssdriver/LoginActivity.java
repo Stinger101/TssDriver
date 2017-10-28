@@ -2,10 +2,14 @@ package com.example.johnrarui.tssdriver;
 
 import android.app.ProgressDialog;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 
+import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -33,7 +37,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -48,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    String Email, Password;
+    String Email, Password,token;
 
     ProgressDialog progressDialog;
 
@@ -83,6 +91,18 @@ public class LoginActivity extends AppCompatActivity {
 
 
         progressDialog=new ProgressDialog(this);
+        BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Get extra data included in the Intent
+                token = intent.getStringExtra("token");
+                Toast.makeText(context, token, Toast.LENGTH_SHORT).show();
+
+                // Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        };
+        LocalBroadcastManager.getInstance(LoginActivity.this).registerReceiver(
+                mMessageReceiver, new IntentFilter("TokenUpdates"));
 
 
 
@@ -129,6 +149,18 @@ public class LoginActivity extends AppCompatActivity {
                                 progressDialog.dismiss();
 
                             }else{
+                                DatabaseReference myRef= FirebaseDatabase.getInstance().getReference("tokens");
+                                Map map =new HashMap();
+                                map.put("token",token);
+                                myRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Intent intent=new Intent(LoginActivity.this,MapsActivity.class);
+
+                                        startActivity(intent);
+                                    }
+                                });
+
 
                                 Toast.makeText(LoginActivity.this, "Signin successful", Toast.LENGTH_SHORT).show();
 
@@ -170,7 +202,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
-                if (user != null) {
+                if (user != null&&token==null) {
 
                     Intent intent=new Intent(LoginActivity.this,MapsActivity.class);
 

@@ -1,5 +1,9 @@
 package com.example.johnrarui.tssdriver;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -7,6 +11,7 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -17,11 +22,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -56,6 +63,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 myLat = location.getLatitude();
                 myLong = location.getLongitude();
                 mMap.clear();
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("geofire");
+                String randomId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                GeoFire geoFire = new GeoFire(ref);
+                geoFire.setLocation(randomId, new GeoLocation(myLat, myLong), new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        if (error != null) {
+                            Toast.makeText(MapsActivity.this, "There was an error saving the location to GeoFire: " + error, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MapsActivity.this, "Location saved on server successfully!", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
 
 
                 mMap.addMarker(new MarkerOptions()
@@ -86,29 +107,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         };
+        mlocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 2, mLocationListener);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        setGeoKey();
+
+
 
 
 
     }
     public void setGeoKey() {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("geofire");
-        String randomId = ref.push().getKey();
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.setLocation("driverLocation/" + randomId, new GeoLocation(myLat, myLong), new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                if (error != null) {
-                    Toast.makeText(MapsActivity.this, "There was an error saving the location to GeoFire: " + error, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MapsActivity.this, "Location saved on server successfully!", Toast.LENGTH_SHORT).show();
-                }
 
-            }
-        });
     }
 
 
